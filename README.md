@@ -1,3 +1,3 @@
-# FullstackOpen2021Submission
+# FullstackOpen 2021 Submission
 
-My submission for the fullstack open course: [fullstackopen.com](https://fullstackopen.com/)
+My submission repository for the open course: [fullstackopen.com](https://fullstackopen.com/)

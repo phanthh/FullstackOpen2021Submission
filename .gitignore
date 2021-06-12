@@ -2,7 +2,7 @@ node_modules/
 build/
 
 README.md
-!./README.md
+!/README.md
 
 # misc
 .DS_Store

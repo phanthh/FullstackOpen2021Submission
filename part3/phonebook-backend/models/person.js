@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 const url = process.env.MONGO_URI;
 
 console.log("connecting to: ", url);
@@ -17,10 +18,23 @@ mongoose
     console.log("failed to connect to MongoDB", err.message);
   });
 
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+const personSchema = mongoose.Schema({
+  name: {
+    type: String,
+    require: true,
+    unique: true,
+    minLength: 3,
+  },
+  number: {
+    type: String,
+    validate: {
+      validator: (v) => v.replace(/[^0-9]/g, "").length >= 8,
+      message: (props) => `${props.value} must have at least 8 digits!`,
+    },
+  },
 });
+
+personSchema.plugin(uniqueValidator);
 
 personSchema.set("toJSON", {
   transform: (document, returnedObject) => {

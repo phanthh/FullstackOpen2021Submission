@@ -45,11 +45,13 @@ const App = () => {
 
   const addPerson = (e) => {
     e.preventDefault();
+
     // Check if user exists, is so, update with new number
     const newPerson = {
       name: newName,
       number: newPhone,
     };
+
     const existingPerson = persons.find((p) => p.name === newName);
     if (existingPerson) {
       if (
@@ -72,11 +74,8 @@ const App = () => {
             showAlert(`Updated ${newName}'s phone number`, 5);
           })
           .catch((error) => {
-            console.error(error);
-            showError(
-              `Information of ${newName} has already been removed from server`,
-              5
-            );
+            console.error(error.response.data.error);
+            showError(error.response.data.error, 5);
           });
       }
     } else {
@@ -84,14 +83,13 @@ const App = () => {
         .create(newPerson)
         .then((data) => {
           setPersons(persons.concat(data));
-          console.log(data.id);
           setNewName("");
           setNewPhone("");
           showAlert(`Added ${newName}'s phone number`, 5);
         })
         .catch((error) => {
-          console.error(error);
-          showError(`Server error: Failed to add ${newName} information`, 5);
+          console.error(error.response.data.error);
+          showError(error.response.data.error, 5);
         });
     }
   };
@@ -105,7 +103,10 @@ const App = () => {
           showAlert(`Deleted ${person.name}`, 5);
           setPersons(persons.filter((p) => p.id !== id));
         })
-        .catch((error) => console.error(error));
+        .catch((error) => {
+          console.error(error.response.data.error);
+          showError(error.response.data.error, 5);
+        });
     }
   };
   // Filtering Search

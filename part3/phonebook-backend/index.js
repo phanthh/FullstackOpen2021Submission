@@ -2,17 +2,20 @@ require("dotenv").config();
 const Person = require("./models/person");
 const express = require("express");
 const morgan = require("morgan");
-const cors = require("cors");
-const app = express();
+// const cors = require("cors");
 const PORT = process.env.PORT || 3001;
+const app = express();
 
 // CORS
-app.use(cors());
+// app.use(cors());
 
-// JSONIFY RESQUEST
+// SERVE STATIC
+app.use(express.static("build"));
+
+// JSON MIDDLEWARE
 app.use(express.json());
 
-// MORGAN
+// MORGAN (FOR LOGGING)
 morgan.token("person", (req, res) => {
   return JSON.stringify(req.body);
 });
@@ -23,7 +26,8 @@ app.use(
   )
 );
 
-// ENDPOINTS
+// API ENDPOINTS
+
 // getAll
 app.get("/api/persons", (req, res, next) => {
   Person.find({})
@@ -46,8 +50,8 @@ app.get("/api/persons/:id", (req, res, next) => {
 
 // deleteByID
 app.delete("/api/persons/:id", (req, res, next) => {
-  Person.findByIdAndDelete(req.params.id)
-    .then((result) => {
+  Person.findByIdAndRemove(req.params.id)
+    .then((ret) => {
       res.status(204).end();
     })
     .catch((error) => next(error));
@@ -56,12 +60,6 @@ app.delete("/api/persons/:id", (req, res, next) => {
 // updateByID
 app.put("/api/persons/:id", (req, res, next) => {
   const body = req.body;
-  if (body.name === undefined) {
-    return res.status(400).json({ error: "name missing" });
-  }
-  if (body.number === undefined) {
-    return res.status(400).json({ error: "number missing" });
-  }
   const person = {
     name: body.name,
     number: body.number,
@@ -73,16 +71,9 @@ app.put("/api/persons/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-// addNew
-app.post("/api/persons", (req, res) => {
+// addNewPerson
+app.post("/api/persons", (req, res, next) => {
   const body = req.body;
-  if (body.name === undefined) {
-    return res.status(400).json({ error: "name missing" });
-  }
-  if (body.number === undefined) {
-    return res.status(400).json({ error: "number missing" });
-  }
-
   const person = new Person({
     name: body.name,
     number: body.number,
@@ -96,6 +87,7 @@ app.post("/api/persons", (req, res) => {
     .catch((error) => next(error));
 });
 
+// databaseInfo
 app.get("/info", (req, res) => {
   Person.count({}).then((length) => {
     res.send(`
@@ -108,16 +100,18 @@ app.get("/info", (req, res) => {
 });
 
 // UNKNOWN ENDPOINTS
-const unknownEndpoint = (req, res) => {
+const unknown = (req, res) => {
   res.status(404).send({ error: "unknown endpoint" });
 };
-app.use(unknownEndpoint);
+app.use(unknown);
 
 // ERROR HANDLER
 const errorHandler = (error, req, res, next) => {
   console.error(error.message);
   if (error.name === "CastError") {
     return res.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return res.status(400).send({ error: error.message });
   }
   next(error);
 };
@@ -125,7 +119,6 @@ const errorHandler = (error, req, res, next) => {
 app.use(errorHandler);
 
 // LISTEN
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -41,7 +41,7 @@ const App = () => {
     setNewPhone(e.target.value.trim());
   };
 
-  // Altering server functions
+  // Alter server functions
 
   const addPerson = (e) => {
     e.preventDefault();
@@ -51,7 +51,6 @@ const App = () => {
       number: newPhone,
     };
     const existingPerson = persons.find((p) => p.name === newName);
-
     if (existingPerson) {
       if (
         window.confirm(
@@ -74,8 +73,6 @@ const App = () => {
           })
           .catch((error) => {
             console.error(error);
-
-            // Error
             showError(
               `Information of ${newName} has already been removed from server`,
               5
@@ -87,16 +84,13 @@ const App = () => {
         .create(newPerson)
         .then((data) => {
           setPersons(persons.concat(data));
+          console.log(data.id);
           setNewName("");
           setNewPhone("");
-
-          // Alert
           showAlert(`Added ${newName}'s phone number`, 5);
         })
         .catch((error) => {
           console.error(error);
-
-          // Error
           showError(`Server error: Failed to add ${newName} information`, 5);
         });
     }
